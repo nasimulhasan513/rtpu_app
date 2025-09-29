@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1056789105629",
+    "project_id": "rtpuapp",
+    "storage_bucket": "rtpuapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1056789105629:android:eea8262f86efc747dbc434",
+        "android_client_info": {
+          "package_name": "com.app.rtpu"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBnbLJ3At5O-9lLOFo4QwxOw1uE_Fz6eh8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
