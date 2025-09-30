@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:http/http.dart' as http;
 
@@ -9,15 +10,15 @@ class AuthService {
 
   final HttpClientService _client;
 
-  Future<bool> signIn({required String cred, required String password, required String type}) async {
+  Future<bool> signIn({
+    required String cred,
+    required String password,
+    required String type,
+  }) async {
     await _client.init();
     final response = await _client.post(
       '/auth/signin',
-      body: jsonEncode({
-        'cred': cred,
-        'password': password,
-        'type': type,
-      }),
+      body: jsonEncode({'cred': cred, 'password': password, 'type': type}),
     );
     if (response.statusCode == 200) return true;
     throw http.ClientException('Signin failed', response.request?.url);
@@ -26,20 +27,26 @@ class AuthService {
   Future<bool> googleLogin({String? idToken, String? accessToken}) async {
     await _client.init();
     final Map<String, dynamic> body = {};
-    if (idToken != null && idToken.isNotEmpty) {
-      // Send both naming conventions to maximize backend compatibility
-      body['idToken'] = idToken;
-      body['id_token'] = idToken;
-    }
     if (accessToken != null && accessToken.isNotEmpty) {
       body['accessToken'] = accessToken;
-      body['access_token'] = accessToken;
     }
+
     if (body.isEmpty) {
       throw ArgumentError('Missing Google token');
     }
-    final response = await _client.post('/auth/google', body: jsonEncode(body));
 
+    log(
+      'Google login with body: $body',
+      name: 'AuthService.googleLogin',
+    ); // Debug log
+    final response = await _client.post(
+      '/auth/google',
+      body: jsonEncode(body),
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    );
     if (response.statusCode == 200) return true;
     final String details = response.body.isEmpty ? '' : ': ${response.body}';
     throw http.ClientException(
@@ -73,7 +80,10 @@ class AuthService {
 
   Future<String> updateProfile(Map<String, dynamic> payload) async {
     await _client.init();
-    final response = await _client.post('/auth/profile', body: jsonEncode(payload));
+    final response = await _client.post(
+      '/auth/profile',
+      body: jsonEncode(payload),
+    );
     if (response.statusCode == 200) {
       return response.body.isEmpty ? 'OK' : response.body;
     }
@@ -82,24 +92,38 @@ class AuthService {
 
   Future<bool> updateProfileZod(Map<String, dynamic> payload) async {
     await _client.init();
-    final response = await _client.post('/auth/update', body: jsonEncode(payload));
+    final response = await _client.post(
+      '/auth/update',
+      body: jsonEncode(payload),
+    );
     if (response.statusCode == 200) return true;
-    throw http.ClientException('Update profile (zod) failed', response.request?.url);
+    throw http.ClientException(
+      'Update profile (zod) failed',
+      response.request?.url,
+    );
   }
 
-  Future<String> requestProfilePicUpload({required String fileName, int? fileSize, String? fileType}) async {
+  Future<String> requestProfilePicUpload({
+    required String fileName,
+    int? fileSize,
+    String? fileType,
+  }) async {
     await _client.init();
-    final response = await _client.post('/auth/update_pic',
-        body: jsonEncode({
-          'fileName': fileName,
-          if (fileSize != null) 'fileSize': fileSize,
-          if (fileType != null) 'fileType': fileType,
-        }));
+    final response = await _client.post(
+      '/auth/update_pic',
+      body: jsonEncode({
+        'fileName': fileName,
+        if (fileSize != null) 'fileSize': fileSize,
+        if (fileType != null) 'fileType': fileType,
+      }),
+    );
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body) as Map<String, dynamic>;
       return data['uploadUrl'] as String;
     }
-    throw http.ClientException('Request pic upload failed', response.request?.url);
+    throw http.ClientException(
+      'Request pic upload failed',
+      response.request?.url,
+    );
   }
 }
-

@@ -84,6 +84,10 @@ class AuthProvider extends ChangeNotifier {
       }
       final ok = await _authService.googleLogin(idToken: idToken, accessToken: accessToken);
       if (ok) {
+
+        log('user: ${ok.toString()}');
+
+   
         _user = await _authService.currentUser();
         _status = _user != null ? AuthStatus.authenticated : AuthStatus.unauthenticated;
       }
